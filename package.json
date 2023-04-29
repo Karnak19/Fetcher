@@ -1,0 +1,29 @@
+{
+  "name": "@karnak19/fetcher",
+  "version": "1.0.0",
+  "description": "A tiny (less than 1kb) dead simple wrapper for Fetch API instance.",
+  "main": "index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup src/index.ts --format esm --dts --minify"
+  },
+  "keywords": [
+    "fetch",
+    "wrapper",
+    "api",
+    "http",
+    "https"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
+  },
+  "homepage": "https://github.com/karnak19/fetcher#readme",
+  "repository": "github:karnak19/fetcher"
+}
