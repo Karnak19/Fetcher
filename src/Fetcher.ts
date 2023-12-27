@@ -3,7 +3,7 @@ export class Fetcher {
 
   constructor(readonly baseUrl: string, readonly headers: Headers) {}
 
-  private accumulateHeaders(requestHeaders: Headers) {
+  private accumulateHeaders(requestHeaders?: Headers) {
     const headers = new Headers(this.headers);
 
     if (this.hooks.onBefore) {
@@ -34,7 +34,7 @@ export class Fetcher {
     return (await res.json()) as T;
   }
 
-  async get<T>(url: string, headers: Headers) {
+  async get<T>(url: string, headers?: Headers) {
     const res = await fetch(this.baseUrl + url, {
       method: "GET",
       headers: this.accumulateHeaders(headers),
@@ -43,7 +43,7 @@ export class Fetcher {
     return this.handleRes<T>(res);
   }
 
-  async post<T>(url: string, body: BodyInit, headers: Headers) {
+  async post<T>(url: string, body: BodyInit, headers?: Headers) {
     const res = await fetch(this.baseUrl + url, {
       method: "POST",
       headers: this.accumulateHeaders(headers),
@@ -53,7 +53,7 @@ export class Fetcher {
     return this.handleRes<T>(res);
   }
 
-  async put<T>(url: string, body: BodyInit, headers: Headers) {
+  async put<T>(url: string, body: BodyInit, headers?: Headers) {
     const res = await fetch(this.baseUrl + url, {
       method: "PUT",
       headers: this.accumulateHeaders(headers),
@@ -63,7 +63,7 @@ export class Fetcher {
     return this.handleRes<T>(res);
   }
 
-  async delete<T>(url: string, body: BodyInit, headers: Headers) {
+  async delete<T>(url: string, body: BodyInit, headers?: Headers) {
     const res = await fetch(this.baseUrl + url, {
       method: "DELETE",
       headers: this.accumulateHeaders(headers),
