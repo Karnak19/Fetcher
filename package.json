@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "build": "tsup src/index.ts --format esm --dts --minify"
   },
   "keywords": [
@@ -22,10 +22,11 @@
   ],
   "author": "",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
     "tsup": "^6.7.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^1.1.0",
+    "vitest-fetch-mock": "^0.2.2"
   },
   "homepage": "https://github.com/karnak19/fetcher#readme",
   "repository": "github:karnak19/fetcher"
