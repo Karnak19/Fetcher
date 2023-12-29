@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/Karnak19/Fetcher/compare/v1.0.2...v1.0.3) (2023-12-29)
+
+
+### Bug Fixes
+
+* Add Fetcher test file with test cases ([4cc49c1](https://github.com/Karnak19/Fetcher/commit/4cc49c13403c3a7ff98ec11aecb305914cb66ab0))
+
 ## [1.0.2](https://github.com/Karnak19/Fetcher/compare/v1.0.1...v1.0.2) (2023-12-27)
 
 
