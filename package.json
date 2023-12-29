@@ -1,6 +1,6 @@
 {
   "name": "@karnak19/fetcher",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A tiny (less than 1kb) dead simple wrapper for Fetch API instance.",
   "main": "index.js",
   "type": "module",
