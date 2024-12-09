@@ -1,87 +1,170 @@
+export type BeforeHooks = (
+  url: string,
+  options: RequestInit
+) => Promise<void> | void;
+export type AfterHooks = (
+  response: Response,
+  data: any
+) => Promise<void> | void;
+
+export interface FetcherOptions extends RequestInit {
+  baseUrl?: string;
+  onBefore?: BeforeHooks | BeforeHooks[];
+  onAfter?: AfterHooks | AfterHooks[];
+}
+
+export interface FetcherResponse<T = any> {
+  data: T;
+  status: number;
+  headers: Headers;
+}
+
+export interface FetcherError extends Error {
+  status: number;
+  data?: any;
+  headers?: Headers;
+}
+
+export class FetcherError extends Error {
+  status: number;
+  data?: any;
+  headers?: Headers;
+
+  constructor(message: string, status: number, data?: any, headers?: Headers) {
+    super(message);
+    this.status = status;
+    this.data = data;
+    this.headers = headers;
+  }
+}
+
 export class Fetcher {
-  private hooks: { onBefore?: (() => Headers)[] } = {};
+  private baseUrl: string;
+  private defaultOptions: RequestInit;
+  private beforeHooks: BeforeHooks[] = [];
+  private afterHooks: AfterHooks[] = [];
 
-  constructor(readonly baseUrl: string, readonly headers: Headers) {}
+  constructor(options: FetcherOptions = {}) {
+    this.baseUrl = options.baseUrl || "";
+    const { onBefore, onAfter, ...rest } = options;
 
-  private accumulateHeaders(requestHeaders?: Headers) {
-    const headers = new Headers(this.headers);
-
-    if (this.hooks.onBefore) {
-      this.hooks.onBefore.forEach((c) => {
-        const h = c();
-        h.forEach((v, k) => {
-          headers.set(k, v);
-        });
-      });
+    if (onBefore) {
+      this.beforeHooks = Array.isArray(onBefore) ? onBefore : [onBefore];
+    }
+    if (onAfter) {
+      this.afterHooks = Array.isArray(onAfter) ? onAfter : [onAfter];
     }
 
-    if (requestHeaders) {
-      requestHeaders.forEach((v, k) => {
-        headers.set(k, v);
-      });
-    }
-
-    return headers;
+    this.defaultOptions = rest;
   }
 
-  private async handleRes<T>(res: Response) {
-    if (!res.ok) {
-      return Promise.reject(res);
-    }
-    if (res.status >= 400) {
-      return Promise.reject(res);
-    }
-    return (await res.json()) as T;
-  }
-
-  async get<T>(url: string, headers?: Headers) {
-    const res = await fetch(this.baseUrl + url, {
-      method: "GET",
-      headers: this.accumulateHeaders(headers),
-    });
-
-    return this.handleRes<T>(res);
-  }
-
-  async post<T>(url: string, body: BodyInit, headers?: Headers) {
-    const res = await fetch(this.baseUrl + url, {
-      method: "POST",
-      headers: this.accumulateHeaders(headers),
-      body,
-    });
-
-    return this.handleRes<T>(res);
-  }
-
-  async put<T>(url: string, body: BodyInit, headers?: Headers) {
-    const res = await fetch(this.baseUrl + url, {
-      method: "PUT",
-      headers: this.accumulateHeaders(headers),
-      body,
-    });
-
-    return this.handleRes<T>(res);
-  }
-
-  async delete<T>(url: string, body: BodyInit, headers?: Headers) {
-    const res = await fetch(this.baseUrl + url, {
-      method: "DELETE",
-      headers: this.accumulateHeaders(headers),
-      body,
-    });
-
-    return this.handleRes<T>(res);
-  }
-
-  // a method to setup onBefore hooks, that get called before every request
-
-  onBefore(hooks: (() => Headers)[]) {
-    hooks.forEach((c) => {
-      this.hooks.onBefore = this.hooks.onBefore || [];
-
-      this.hooks.onBefore.push(c);
-    });
-
+  addBeforeHook(hook: BeforeHooks) {
+    this.beforeHooks.push(hook);
     return this;
+  }
+
+  addAfterHook(hook: AfterHooks) {
+    this.afterHooks.push(hook);
+    return this;
+  }
+
+  removeBeforeHook(hook: BeforeHooks) {
+    this.beforeHooks = this.beforeHooks.filter((h) => h !== hook);
+    return this;
+  }
+
+  removeAfterHook(hook: AfterHooks) {
+    this.afterHooks = this.afterHooks.filter((h) => h !== hook);
+    return this;
+  }
+
+  clearHooks() {
+    this.beforeHooks = [];
+    this.afterHooks = [];
+    return this;
+  }
+
+  private async request<T>(path: string, options: RequestInit = {}) {
+    const url = this.baseUrl + path;
+
+    const mergedOptions = {
+      ...this.defaultOptions,
+      ...options,
+    };
+
+    mergedOptions.headers = {
+      "Content-Type": "application/json",
+      ...(this.defaultOptions.headers as Record<string, string>),
+      ...(options.headers as Record<string, string>),
+    };
+
+    try {
+      for (const hook of this.beforeHooks) {
+        await hook(url, mergedOptions);
+      }
+
+      mergedOptions.headers = {
+        ...mergedOptions.headers,
+        ...options.headers,
+      };
+
+      const res = await fetch(url, mergedOptions);
+      const data = await res.json().catch(() => null);
+
+      for (const hook of this.afterHooks) {
+        await hook(res, data);
+      }
+
+      if (!res.ok) {
+        throw new FetcherError(res.statusText, res.status, data, res.headers);
+      }
+
+      return {
+        data,
+        status: res.status,
+        headers: res.headers,
+      } satisfies FetcherResponse<T>;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async get<T>(
+    path: string,
+    options: RequestInit = {}
+  ): Promise<FetcherResponse<T>> {
+    return this.request<T>(path, { ...options, method: "GET" });
+  }
+
+  async post<T>(
+    path: string,
+    options: RequestInit = {}
+  ): Promise<FetcherResponse<T>> {
+    return this.request<T>(path, { ...options, method: "POST" });
+  }
+
+  async put<T>(
+    path: string,
+    options: RequestInit = {}
+  ): Promise<FetcherResponse<T>> {
+    return this.request<T>(path, { ...options, method: "PUT" });
+  }
+
+  async delete<T>(
+    path: string,
+    options: RequestInit = {}
+  ): Promise<FetcherResponse<T>> {
+    return this.request<T>(path, { ...options, method: "DELETE" });
+  }
+
+  parseError(error: Error) {
+    if (error instanceof FetcherError) {
+      return {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+        headers: error.headers,
+      };
+    }
   }
 }
