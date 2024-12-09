@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Karnak19/Fetcher/compare/v1.0.3...v1.1.0) (2024-12-09)
+
+
+### Features
+
+* release v2.0.0 with TypeScript-first HTTP client, enhanced hooks support, and improved error handling ([eb3505d](https://github.com/Karnak19/Fetcher/commit/eb3505d977b8f185f6b25bb1ac5dc942d57873c9))
+
 ## [1.0.3](https://github.com/Karnak19/Fetcher/compare/v1.0.2...v1.0.3) (2023-12-29)
 
 
