@@ -23,10 +23,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "tsup": "^6.7.0",
-    "typescript": "^5.0.4",
-    "vitest": "^1.1.0",
-    "vitest-fetch-mock": "^0.2.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "vitest-fetch-mock": "^0.4.2"
   },
   "homepage": "https://github.com/karnak19/fetcher#readme",
   "repository": "github:karnak19/fetcher"
